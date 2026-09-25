@@ -1,0 +1,116 @@
+variable,code,label_TO_FILL,short_label_TO_FILL
+sex,1.0,Male,Male
+sex,2.0,Female,Female
+fwealthq,1.0,Poorest,Poorest
+fwealthq,2.0,Poor,Poor
+fwealthq,3.0,Middle,Middle
+fwealthq,4.0,Rich,Rich
+fwealthq,5.0,Richest,Richest
+electrct,0.0,No connection,No connection
+electrct,1.0,No electricity in the area,None in the area
+electrct,2.0,Yes,Yes
+electrct,3.0,"Yes, using generator",Yes — generator
+electrct,4.0,"Yes, but disconnected",Yes — but disconnected
+electrct,5.0,"Yes, tap from a neighbor",Yes — tapped from neighbour
+roof,1.0,Salvaged/makeshift materials,Salvaged/makeshift
+roof,2.0,Mixed but predominantly salvaged materials,Mostly salvaged
+roof,3.0,"Light materials (cogon, nipa, anahaw)","Light (cogon, nipa, anahaw)"
+roof,4.0,Mixed but predominantly light materials,Mostly light
+roof,5.0,Mixed but predominantly strong materials,Mostly strong
+roof,6.0,"Strong Materials (galvanized iron, all)",Strong (galvanised iron)
+wall,1.0,Salvaged/makeshift materials,Salvaged/makeshift
+wall,2.0,Mixed but predominantly salvaged materials,Mostly salvaged
+wall,3.0,"Light materials (bamboo,sawali,cogon,nipa)","Light (bamboo, sawali, nipa)"
+wall,4.0,Mixed but predominantly light materials,Mostly light
+wall,5.0,Mixed but predominantly strong materials,Mostly strong
+wall,6.0,Strong Materials (concrete/brick/stone),Strong (concrete/brick/stone)
+floor,1.0,Earth/Sand,Earth/sand
+floor,2.0,Wood Planks,Wood planks
+floor,3.0,Coco Lumber/Bamboo,Coco lumber/bamboo
+floor,4.0,Marble,Marble
+floor,5.0,Parquet/Polished,Parquet/polished
+floor,6.0,Ceramic Tiles,Ceramic tiles
+floor,7.0,Vinyl/Asphalt Strips,Vinyl/asphalt strips
+floor,8.0,Plain Cement,Plain cement
+dweltype,1.0,Single house,Single house
+dweltype,2.0,Duplex,Duplex
+dweltype,3.0,Multi-unit residential (three units ro more),Multi-unit residential
+dweltype,4.0,"Commercial/industrial/agricultural (office, factory, and others)",Commercial/industrial
+dweltype,6.0,"Other housing unit (boat, cave, and others)","Other (boat, cave)"
+tenurhws,1.0,Own,Own
+tenurhws,2.0,Rent,Rent
+tenurhws,3.0,"Free (owned by parents/relatives, caretaker)",Free (family/caretaker)
+tenurhws,4.0,Settle in public/private dwelling unit/structure w/o  permission from owner,Occupied without permission
+tenurlot,1.0,Own,Own
+tenurlot,2.0,Rent,Rent
+tenurlot,3.0,"Free (owned by parents/relatives, caretaker)",Free (family/caretaker)
+tenurlot,4.0,Settle in public/private dwelling lands w/o  permission from owner,Occupied without permission
+wdrinkng,11.0,"Own-use faucet, community water system","Own faucet, community system"
+wdrinkng,12.0,"Shared faucet, community water system","Shared faucet, community system"
+wdrinkng,13.0,"Own-use, tubed/piped deep well","Own deep well, piped"
+wdrinkng,14.0,Shared tubed/piped deep well,"Shared deep well, piped"
+wdrinkng,21.0,Tubed/piped shallow well,"Shallow well, piped"
+wdrinkng,31.0,Protected Dug Well,Protected dug well
+wdrinkng,32.0,Unprotected Dug Well,Unprotected dug well
+wdrinkng,41.0,Protected Spring,Protected spring
+wdrinkng,42.0,Unprotected Spring,Unprotected spring
+wdrinkng,51.0,"Lake, River, Rain and Lake","Lake, river or rain"
+wdrinkng,61.0,Peddler,Peddler
+wdrinkng,91.0,Bottled water/Mineral water/Water refilling,Bottled / refilling station
+drinksafe,0.0,No,No
+drinksafe,1.0,Yes,Yes
+drinksafe,9.0,Not applicable (Bottled water/Mineral water/Water refilling),Not applicable (bottled)
+toilet,1.0,"Water-sealed, sewer septic tank, used exclusively by household","Water-sealed septic, own"
+toilet,2.0,"Water-sealed, sewer/septic tank, shared with other households","Water-sealed septic, shared"
+toilet,3.0,"Water-sealed, other depositories, used exclusively by household","Water-sealed other, own"
+toilet,4.0,"Water-sealed, other depositories, shared with other households","Water-sealed other, shared"
+toilet,5.0,Closed pit,Closed pit
+toilet,6.0,Open pit,Open pit
+toilet,7.0,Others (pail system and others),Other (pail system)
+toilet,8.0,"No toilet facility (bush, field, river, etc.)","None (bush, field, river)"
+fuelmain,0.0,Not cooking,Not cooking
+fuelmain,1.0,Electricity,Electricity
+fuelmain,2.0,Liquefied Petroleum Gas,LPG
+fuelmain,3.0,Natural gas,Natural gas
+fuelmain,4.0,Kerosene,Kerosene
+fuelmain,5.0,Charcoal,Charcoal
+fuelmain,6.0,Wood,Wood
+fuelmain,7.0,Agricultural Crop,Agricultural crop
+fuelmain,9.0,Others,Other
+collect,0.0,No,No
+collect,1.0,Yes,Yes
+burn,0.0,No,No
+burn,1.0,Yes,Yes
+dump,0.0,No,No
+dump,1.0,Yes,Yes
+makesafe,0.0,No treatment,No treatment
+makesafe,1.0,Boil,Boil
+makesafe,2.0,Add bleach/chlorine,Bleach/chlorine
+makesafe,3.0,Use a water filter,Water filter
+makesafe,4.0,Improvised filter,Improvised filter
+makesafe,5.0,Solar disinfection,Solar disinfection
+makesafe,6.0,Let it stand or settle,Let it stand or settle
+makesafe,9.0,Not applicable (Bottled water/Mineral water/Water refilling),Not applicable (bottled)
+segregate,0.0,No,No
+segregate,1.0,Yes,Yes
+composting,0.0,No,No
+composting,1.0,Yes,Yes
+ethnicity,0.0,"No, Not an Indigenous People",No
+ethnicity,1.0,"Yes, Indigenous People",Yes
+regcode,1.0,Region I (Ilocos Region),Region I — Ilocos
+regcode,2.0,Region II (Cagayan Valley),Region II — Cagayan Valley
+regcode,3.0,Region III (Central Luzon),Region III — Central Luzon
+regcode,5.0,Region V (Bicol Region),Region V — Bicol
+regcode,6.0,Region VI (Western Visayas),Region VI — W. Visayas
+regcode,7.0,Region VII (Central Visayas),Region VII — C. Visayas
+regcode,8.0,Region VIII (Eastern Visayas),Region VIII — E. Visayas
+regcode,9.0,Region IX (Zamboanga Peninsula),Region IX — Zamboanga
+regcode,10.0,Region X (Northern Mindanao),Region X — N. Mindanao
+regcode,11.0,Region XI (Davao Region),Region XI — Davao
+regcode,12.0,Region XII (SOCCSKSARGEN),Region XII — SOCCSKSARGEN
+regcode,13.0,National Capital Region (NCR),National Capital Region
+regcode,14.0,Cordillera Administrative Region (CAR),Cordillera (CAR)
+regcode,15.0,Autonomous Region In Muslim Mindanao (ARMM),ARMM
+regcode,16.0,Region XIII (CARAGA),Region XIII — CARAGA
+regcode,41.0,Region IV-A (CALABARZON),Region IV-A — CALABARZON
+regcode,42.0,Region IV-B (MIMAROPA),Region IV-B — MIMAROPA

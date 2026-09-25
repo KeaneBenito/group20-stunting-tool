@@ -1,0 +1,82 @@
+{
+  "model_name": "Exp4_ADASYN_XGB",
+  "model_file": "model_Exp4_ADASYN_XGB.json",
+  "exported_at": "2026-09-13 07:41",
+  "class_order": [
+    "Normal",
+    "Stunted",
+    "Severely Stunted"
+  ],
+  "severe_class_index": 2,
+  "feature_cols": [
+    "weight",
+    "age",
+    "bedroom",
+    "floor",
+    "wall",
+    "fwealthq",
+    "roof",
+    "tenurlot",
+    "sex",
+    "electrct",
+    "makesafe",
+    "burn",
+    "tenurhws",
+    "segregate",
+    "composting",
+    "drinksafe",
+    "dump",
+    "collect",
+    "toilet_1.0",
+    "wdrinkng_41.0",
+    "wdrinkng_14.0",
+    "fuelmain_6.0",
+    "wdrinkng_91.0",
+    "ethnicity",
+    "wdrinkng_11.0",
+    "toilet_2.0",
+    "fuelmain_2.0",
+    "fuelmain_5.0",
+    "wdrinkng_12.0",
+    "regcode_8",
+    "regcode_10"
+  ],
+  "tau_H": 0.09889556467533112,
+  "tau_M": 0.049,
+  "tau_M_source": "caseload target 30.0% of screened children flagged (achieved 30.13%)",
+  "impute": {
+    "weight": 11.69999980926514,
+    "age": 2.822724104,
+    "bedroom": 1.0,
+    "fwealthq": 1.0,
+    "roof": 6.0,
+    "wall": 6.0,
+    "floor": 8.0,
+    "dweltype": 1.0,
+    "tenurhws": 1.0,
+    "tenurlot": 1.0,
+    "electrct": 2.0,
+    "wdrinkng": 91.0,
+    "drinksafe": 0.0,
+    "makesafe": 0.0,
+    "toilet": 1.0,
+    "fuelmain": 6.0,
+    "collect": 0.0,
+    "burn": 0.0,
+    "dump": 0.0,
+    "composting": 0.0,
+    "segregate": 1.0
+  },
+  "scaler": {
+    "weight": [
+      11.633574383551077,
+      3.4945029302608726
+    ],
+    "age": [
+      2.7028876781178597,
+      1.436853151054606
+    ]
+  },
+  "n_train": 34524,
+  "notebook": "SuperSuperLatestColab_Thesis_PATCH8"
+}

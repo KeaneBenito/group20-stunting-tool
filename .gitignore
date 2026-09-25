@@ -1,0 +1,42 @@
+# ENNS microdata: NEVER commit. Held under the FNRI-DOST data use arrangement.
+# Deny ALL data files by default...
+*.csv
+*.npy
+*.xlsx
+*.xls
+*.parquet
+*.sav
+*.dta
+*.pkl
+*.joblib
+
+# ...then allow ONLY the two reference tables
+!artefacts/enns_codebook.csv
+!artefacts/section_3_11_threshold_surface.csv
+
+# Microdata folder and demo materials
+test_data/
+DEFENSE_DEMO_RUNBOOK.md
+
+# Evidence and local test outputs (quote microdata paths)
+stage_b_output*.txt
+self_test_*.txt
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Streamlit local secrets (none used)
+.streamlit/secrets.toml

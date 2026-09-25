@@ -1,0 +1,30 @@
+{
+  "best_condition": "Exp4_ADASYN_XGB",
+  "tau_H": 0.09889556467533112,
+  "tau_M": 0.049,
+  "tau_H_method": "Youden's J-statistic",
+  "tau_M_method": "caseload",
+  "tau_M_note": "caseload target 30.0% of screened children flagged (achieved 30.13%)",
+  "tau_M_target_sensitivity": null,
+  "tau_M_caseload_pct": 30.0,
+  "band_width": 0.049895564675331114,
+  "n_severe_total": 571,
+  "n_severe_captured_high_plus_monitoring": 521,
+  "screening_burden_pct": 30.132066728452273,
+  "sensitivity_at_tau_H": 0.8388791593695272,
+  "specificity_at_tau_H": 0.8455526609601787,
+  "precision_at_tau_H": 0.27784222737819025,
+  "sensitivity_at_tau_M": 0.9124343257443083,
+  "specificity_at_tau_M": 0.7419674978290535,
+  "precision_at_tau_M": 0.20030757400999616,
+  "tier_counts": {
+    "High Priority": 1724,
+    "Needs Monitoring": 877,
+    "On Track": 6031
+  },
+  "tier_pct": {
+    "High Priority": 19.97,
+    "Needs Monitoring": 10.16,
+    "On Track": 69.87
+  }
+}
