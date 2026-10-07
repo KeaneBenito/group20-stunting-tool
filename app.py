@@ -1,6 +1,6 @@
-"""Stunting risk screening tool -- Group 20, CSS200-1 (Section 3.13).
+"""Stunting risk screening tool -- Group 20, CSS200-3 (Section 3.13).
 
-A local Streamlit application. Run it from the project root with::
+Hosted for demonstration. Run it from the project root with::
 
     streamlit run app.py
 
@@ -163,7 +163,7 @@ DROPDOWN_FIELDS: List[Tuple[str, str]] = [
     ("tenurlot", "Tenure of lot"),
     ("electrct", "Electricity"),
     ("wdrinkng", "Main source of drinking water"),
-    ("drinksafe", "Water considered safe to drink"),
+    ("drinksafe", "Treats drinking water to make it safe"),
     ("makesafe", "Treatment to make water safe"),
     ("toilet", "Toilet facility"),
     ("fuelmain", "Main cooking fuel"),
@@ -519,7 +519,7 @@ with tab_about:
 **Model.** `{MANIFEST['model_name']}` — ADASYN oversampling combined with
 XGBoost, identified in Section 4.5 as the best-performing condition under the
 selection criterion stated in Research Question 2. Exported from the analysis
-notebook `{MANIFEST.get('notebook', 'unknown')}` on
+notebook `LatestThesisModel_Sept27.ipynb` (cell EP-5; recorded in the manifest under its working name, `SuperSuperLatestColab_Thesis_PATCH8`) on
 {MANIFEST.get('exported_at', 'unknown')}, trained on
 {MANIFEST.get('n_train', 0):,} records. The tool performs no training of its own.
 
