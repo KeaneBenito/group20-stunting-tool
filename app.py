@@ -224,7 +224,7 @@ def _result_block(prob: float, tier: str) -> None:
 
 st.title("Stunting Risk Screening Tool")
 st.caption(
-    "Group 20 · CSS200-1 · research prototype, run locally. "
+    "Group 20 · CSS200-3 · research prototype, hosted for demonstration. "
     "Screening support only — not a diagnosis."
 )
 
