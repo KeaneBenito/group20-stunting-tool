@@ -1,13 +1,15 @@
 """Stunting risk screening tool -- Group 20, CSS200-3 (Section 3.13).
 
-Hosted for demonstration. Run it from the project root with::
+Runs the v2 model (twelve nominal variables one-hot encoded; 44 feature
+columns). Hosted on Streamlit Community Cloud for demonstration only; run it
+locally from the project root with::
 
     streamlit run app.py
 
-It makes no network request of any kind: no remote fonts, no images fetched
-from a CDN, no telemetry, no API calls. Section 1.6 Limitation 5 and Section
-3.13.1 both state that the tool was not deployed and not hosted, and network
-code would make those statements false.
+The application code makes no outbound request of its own: no remote fonts,
+no images fetched from a CDN, no API calls. It is a research prototype hosted
+for demonstration and examination; it has not been deployed into any health
+service (Section 1.6, Limitation 5).
 
 All inference logic lives in ``stunting_core``, which ``self_test.py`` also
 imports, so the code path demonstrated to the panel is the same code path the
@@ -19,6 +21,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Dict, List, Optional, Tuple
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -41,12 +44,17 @@ def _boot():
 
 @st.cache_data(show_spinner=False)
 def _reference_data():
-    return core.load_codebook(), core.load_thresholds_json(), core.load_surface()
+    return (
+        core.load_codebook(),
+        core.load_thresholds_json(),
+        core.load_surface(),
+        core.load_reproduction(),
+    )
 
 
 try:
     MANIFEST, PROBLEMS, MODEL = _boot()
-    CODEBOOK, THRESHOLDS, SURFACE = _reference_data()
+    CODEBOOK, THRESHOLDS, SURFACE, REPRO = _reference_data()
 except core.ToolError as exc:
     st.error(str(exc))
     st.stop()
@@ -96,6 +104,18 @@ def _age_from_dates(dob: dt.date, measured: dt.date) -> Tuple[Optional[float], s
 
 MANIFEST_TAU_H = float(MANIFEST["tau_H"])
 MANIFEST_TAU_M = float(MANIFEST["tau_M"])
+EXPORT_DATE = str(MANIFEST.get("exported_at", "unknown"))[:10]
+NOTEBOOK = str(MANIFEST.get("notebook", "the analysis notebook"))
+
+# Caseload presets for tau_M (Section 3.12; section_3_12_caseload_options_v2.csv,
+# carried in the manifest). The 20 per cent option is omitted because it leaves
+# a degenerate Needs Monitoring tier of seven children.
+TAU_M_PRESET_HELP = "Caseload presets on the held-out test partition: " + "; ".join(
+    f"{p['caseload_pct']:.0f}% → {p['tau_M']:.3f} ({p['captured']} of 571 severely "
+    f"stunted children in an action tier, {p['captured_pct']:.2f}%)"
+    for p in MANIFEST.get("caseload_presets", [])
+    if not p.get("degenerate")
+) + ". Type a value and press Enter."
 
 # ==========================================================================
 # 2. Sidebar: thresholds as adjustable parameters (Section 3.13.3)
@@ -104,7 +124,7 @@ MANIFEST_TAU_M = float(MANIFEST["tau_M"])
 with st.sidebar:
     st.header("Thresholds")
     st.caption(
-        "Initialised from the exported manifest. Both are parameters rather "
+        "Initialized from the exported manifest. Both are parameters rather "
         "than constants, so a revised value may be substituted without "
         "modifying the tool."
     )
@@ -122,6 +142,7 @@ with st.sidebar:
         "tau_M — Needs Monitoring", min_value=0.0, max_value=1.0,
         value=st.session_state.get("tau_m", MANIFEST_TAU_M),
         step=0.001, format="%.8f", key="tau_m",
+        help=TAU_M_PRESET_HELP,
     )
 
     st.caption(
@@ -140,11 +161,11 @@ with st.sidebar:
         )
 
     st.divider()
-    st.success(f"Bundle verified — {MANIFEST['model_name']}")
+    st.success(f"Bundle verified — {MANIFEST['model_name']} (v2 encoding)")
     st.caption(
-        f"Exported {MANIFEST.get('exported_at', 'unknown')} · "
+        f"Exported {EXPORT_DATE} · "
         f"xgboost {core.EXPECTED_XGBOOST_VERSION} · "
-        f"{len(MANIFEST['feature_cols'])} features"
+        f"{len(MANIFEST['feature_cols'])} feature columns"
     )
 
 # ==========================================================================
@@ -170,9 +191,18 @@ DROPDOWN_FIELDS: List[Tuple[str, str]] = [
     ("collect", "Waste collected"),
     ("burn", "Waste burned"),
     ("dump", "Waste dumped"),
-    ("composting", "Composting practised"),
+    ("composting", "Composting practiced"),
     ("segregate", "Waste segregated"),
 ]
+
+# One-line help under fields whose answers are only partly model inputs
+# (Section 3.3.3: the Stage 1 filter kept some categories and not others).
+FIELD_HELP: Dict[str, str] = {
+    "regcode": (
+        "Only Bicol, Western Visayas, Eastern Visayas, Northern Mindanao and "
+        "ARMM are model inputs; other regions are scored alike."
+    ),
+}
 
 
 @st.cache_data(show_spinner=False)
@@ -295,6 +325,7 @@ with tab_single:
                     format_func=lambda j, o=opts: o[j][1],
                     index=_default_index(var),
                     key=f"sel_{var}",
+                    help=FIELD_HELP.get(var),
                 )
                 values[var] = opts[chosen][0]
 
@@ -357,6 +388,12 @@ with tab_batch:
                     "One or more children are five years or older. The model was "
                     "trained on children under five; remove those rows. If the "
                     "age column holds months, rename it to age_months."
+                )
+            code_problems = core.validate_codes(raw, CODEBOOK)
+            if code_problems:
+                raise core.ToolError(
+                    "The file contains values the ENNS codebook does not define, "
+                    "so it was not scored: " + "; ".join(code_problems)
                 )
             matrix = core.preprocess(raw, MANIFEST)
             probs = core.predict_severe_proba(MODEL, matrix, MANIFEST)
@@ -469,10 +506,50 @@ with tab_thresh:
     if not SURFACE.empty:
         st.divider()
         st.markdown("**Sensitivity–specificity trade-off across the probability range**")
-        st.line_chart(
-            SURFACE.set_index("threshold")[["sensitivity", "specificity", "precision"]],
-            height=320,
+        long = SURFACE.melt(
+            id_vars="threshold",
+            value_vars=["sensitivity", "specificity", "precision"],
+            var_name="Statistic",
+            value_name="Value",
+        ).dropna()
+        long["Statistic"] = long["Statistic"].str.capitalize()
+        # Three distinct, colour-blind-safe hues (Okabe–Ito), so no two series
+        # share a colour, and an x-axis fixed to the probability range 0 to 1.
+        lines = (
+            alt.Chart(long)
+            .mark_line(strokeWidth=2)
+            .encode(
+                x=alt.X(
+                    "threshold:Q",
+                    title="Threshold on P(Severely Stunted)",
+                    scale=alt.Scale(domain=[0, 1], nice=False, zero=False),
+                    axis=alt.Axis(values=[i / 10 for i in range(11)], format=".1f"),
+                ),
+                y=alt.Y("Value:Q", title=None, scale=alt.Scale(domain=[0, 1])),
+                color=alt.Color(
+                    "Statistic:N",
+                    scale=alt.Scale(
+                        domain=["Sensitivity", "Specificity", "Precision"],
+                        range=["#0072B2", "#E69F00", "#009E73"],
+                    ),
+                    legend=alt.Legend(orient="bottom", title=None),
+                ),
+                tooltip=[
+                    alt.Tooltip("threshold:Q", format=".3f", title="Threshold"),
+                    "Statistic:N",
+                    alt.Tooltip("Value:Q", format=".4f"),
+                ],
+            )
         )
+        rules = (
+            alt.Chart(pd.DataFrame({"Threshold in use": ["tau_H", "tau_M"],
+                                    "threshold": [tau_h, tau_m]}))
+            .mark_rule(strokeDash=[4, 3], color="#555555")
+            .encode(x="threshold:Q", tooltip=["Threshold in use:N",
+                                              alt.Tooltip("threshold:Q", format=".6f")])
+        )
+        st.altair_chart((lines + rules).properties(height=320), use_container_width=True)
+        st.caption("Dashed lines mark the thresholds currently set in the sidebar.")
 
         at_h = core.surface_at(SURFACE, tau_h)
         at_m = core.surface_at(SURFACE, tau_m)
@@ -518,18 +595,22 @@ with tab_about:
         f"""
 **Model.** `{MANIFEST['model_name']}` — ADASYN oversampling combined with
 XGBoost, identified in Section 4.5 as the best-performing condition under the
-selection criterion stated in Research Question 2. Exported from the analysis
-notebook `LatestThesisModel_Sept27.ipynb` (cell EP-5; recorded in the manifest under its working name, `SuperSuperLatestColab_Thesis_PATCH8`) on
-{MANIFEST.get('exported_at', 'unknown')}, trained on
-{MANIFEST.get('n_train', 0):,} records. The tool performs no training of its own.
+selection criterion stated in Research Question 2, refitted after the encoding
+revision (twelve nominal variables one-hot encoded; {len(MANIFEST['feature_cols'])}
+feature columns). Exported from the analysis notebook `{NOTEBOOK}` on
+{EXPORT_DATE}, trained on {MANIFEST.get('n_train', 0):,} records. The tool
+performs no training of its own.
 
-**Preprocessing.** Reproduced rather than re-estimated: training-partition
-medians and modes for missing values, the one-hot scheme fitted in Section
-3.3.2 restricted to the {len(MANIFEST['feature_cols'])} features retained by
-the Stage 1 filter of Section 3.3.3, and the standard scaler fitted on the
-training partition. At start-up the application compares its own copy of those
-parameters against the manifest, and the manifest against the booster's own
-recorded schema, refusing to score on any discrepancy.
+**Preprocessing.** Reproduced rather than re-estimated: the ENNS code 9999 is
+treated as missing, missing values are filled with training-partition medians
+and modes, weight and age are standardised with the scaler fitted on the
+training partition, and the one-hot scheme of Section 3.3.2 is restricted to the
+{len(MANIFEST['feature_cols'])} columns retained by the Stage 1 filter of
+Section 3.3.3. An answer category without a retained column (for example a
+region other than Bicol, Western Visayas, Eastern Visayas, Northern Mindanao or
+ARMM) is scored as the reference level. At start-up the application compares
+its own copy of those parameters against the manifest, and the manifest against
+the booster's own recorded schema, refusing to score on any discrepancy.
 
 **Tier performance on the held-out test partition** (Table 4.10, Section 4.7.2,
 n = {core.TEST_PARTITION_N:,}; base rate {core.BASE_RATE_PCT:.2f} per cent):
@@ -564,15 +645,48 @@ n = {core.TEST_PARTITION_N:,}; base rate {core.BASE_RATE_PCT:.2f} per cent):
 - Every output is a screening result requiring in-person assessment. The
   majority of children placed in the High Priority tier are not in fact
   severely stunted (Section 4.7.2).
-
-**Reproduction check (Section 3.13.4).** Both stages were executed. Stage A
-rebuilt the input matrix from the raw held-out records and reproduced all
-thirty-one features for all 8,632 records, with a maximum absolute difference of
-6.22e-14. Stage B scored those records through this same code path: the largest
-difference in predicted probability against the notebook's own output was
-2.96e-08 in the notebook environment and 3.31e-08 on a local machine, and no
-child was assigned a different priority tier in either run. The check is not
-bundled with the hosted application because it requires the ENNS microdata,
-which is not redistributed; it is run from the private repository.
 """
     )
+
+    st.markdown("**Reproduction check (Section 3.13.4).**")
+    nb = (REPRO or {}).get("notebook") or {}
+    local = (REPRO or {}).get("local") or {}
+    if not nb and not local:
+        st.info("artefacts/reproduction_check.json is absent, so no reproduction "
+                "result can be shown.")
+    else:
+        if nb:
+            shape = nb.get("stage_a_shape", [core.TEST_PARTITION_N, len(MANIFEST["feature_cols"])])
+            st.markdown(
+                f"*In the notebook environment* ({nb.get('source', 'cell EP-5 v2')}): "
+                f"Stage A rebuilt the input matrix from the raw held-out records and "
+                f"reproduced all {shape[1]} columns for all {shape[0]:,} records, with a "
+                f"largest absolute difference of {nb['stage_a_max_abs_diff']:.2e}. "
+                f"Stage B scored those records with the exported model: the largest "
+                f"difference in predicted probability was {nb['stage_b_max_abs_diff']:.2e}, "
+                + ("and no child was assigned a different tier."
+                   if nb["tier_disagreements"] == 0 else
+                   f"and {nb['tier_disagreements']} children were assigned a different tier.")
+            )
+        if local:
+            st.markdown(
+                f"*Through this application's own code on a local machine* "
+                f"(self_test.py, {local.get('checked_on', '')}; Python "
+                f"{local.get('python', '?')}, xgboost {local.get('xgboost', '?')}): "
+                f"Stage A largest difference {local['stage_a_max_abs_diff']:.2e} over "
+                f"{local['stage_a_shape'][0]:,} × {local['stage_a_shape'][1]}; Stage B "
+                f"largest difference {local['stage_b_max_abs_diff']:.2e}, "
+                f"{local['tier_disagreements']} tier disagreements; tier counts "
+                + " / ".join(f"{local['tier_counts'][t]:,}" for t in core.TIER_ORDER)
+                + "."
+            )
+        else:
+            st.markdown(
+                "*Through this application's own code:* not yet recorded for this "
+                "version of the model."
+            )
+        st.caption(
+            "The script is published with the application, but it needs the ENNS "
+            "microdata, which is not redistributed, so it cannot be run from this "
+            "hosted copy."
+        )
