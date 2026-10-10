@@ -4,7 +4,12 @@ Run from the project root with the virtual environment active::
 
     python self_test.py
 
-Stage A rebuilds the 31-feature input matrix from the raw held-out records and
+Model v2 (twelve nominal variables one-hot encoded; 44 feature columns).
+
+Preflight verifies the bundle against the hard-coded expectations and then
+proves that the guard refuses altered manifests (negative tests).
+
+Stage A rebuilds the 44-column input matrix from the raw held-out records and
 compares it against ``test_selected.csv``, the matrix the notebook itself
 supplied to the classifier.
 
@@ -12,11 +17,22 @@ Stage B scores those records through the same code path the application uses
 and compares the resulting probabilities and tier assignments against
 ``section_3_11_tier_assignments.csv``.
 
-Exits 0 on pass and 1 on failure. Save the console output as evidence.
+The three files in ``test_data/`` must come from the v2 run (Drive:
+dataset/test.csv, dataset/test_selected.csv and
+dataset/model_outputs/section_3_11_tier_assignments.csv). They are ENNS
+microdata: ``test_data/`` is excluded by .gitignore and must never be committed.
+
+When both stages pass, the aggregate results (no records) are written to the
+"local" block of ``artefacts/reproduction_check.json``, which the About tab
+displays. Exits 0 on pass and 1 on failure. Save the console output as evidence.
 """
 
 from __future__ import annotations
 
+import copy
+import datetime as dt
+import json
+import platform
 import sys
 from pathlib import Path
 
@@ -30,7 +46,14 @@ RAW_TEST = TEST_DATA / "test.csv"
 REF_MATRIX = TEST_DATA / "test_selected.csv"
 REF_TIERS = TEST_DATA / "section_3_11_tier_assignments.csv"
 
-PROB_TOL = 1e-6  # the reference CSV stores float32-derived values
+PROB_TOL = 1e-6      # Stage B: the reference CSV stores float32-derived values
+STAGE_A_TOL = 1e-9   # Stage A: preprocessing must agree to floating-point noise
+
+# Test-partition rows that sit on the thresholds (demo children X02-X05,
+# session handoff #24 section 7.2): 0-based row, expected tier at the manifest
+# thresholds. Row 5980 has P(Severely Stunted) exactly equal to tau_H.
+CUTOFF_ROWS = {5980: "High Priority", 4661: "Needs Monitoring",
+               2487: "Needs Monitoring", 8486: "On Track"}
 RULE = "=" * 78
 
 
@@ -67,12 +90,48 @@ def main() -> int:
             fail(p_)
         print("\nModel file does not match the manifest. Not scoring. Re-export (EP-5).")
         return 1
-    print(f"  PASS  booster schema verified -- 31 features, 3 classes, "
-          f"xgboost {core.EXPECTED_XGBOOST_VERSION}")
+    print(f"  PASS  booster schema verified -- {len(manifest['feature_cols'])} features, "
+          f"3 classes, xgboost {core.EXPECTED_XGBOOST_VERSION}")
     print(f"  PASS  manifest verified -- {manifest['model_name']}, "
           f"exported {manifest.get('exported_at', 'unknown')}")
+    print(f"        notebook = {manifest.get('notebook', '')}")
     print(f"        tau_H = {manifest['tau_H']!r}")
     print(f"        tau_M = {manifest['tau_M']!r}  ({manifest.get('tau_M_source', '')})")
+
+    try:
+        import xgboost
+        xgb_version = xgboost.__version__
+    except ImportError:
+        xgb_version = "not installed"
+    if xgb_version != core.EXPECTED_XGBOOST_VERSION:
+        fail(f"installed xgboost is {xgb_version}; requirements.txt pins "
+             f"{core.EXPECTED_XGBOOST_VERSION}. Run: pip install -r requirements.txt")
+        return 1
+
+    # Negative tests: the guard must refuse a manifest that differs in any of
+    # the parameters it protects (Section 3.13.2).
+    mutations = {
+        "tau_H moved by 1e-6": lambda m: m.__setitem__("tau_H", m["tau_H"] + 1e-6),
+        "feature order reversed": lambda m: m.__setitem__("feature_cols", m["feature_cols"][::-1]),
+        "one-hot code changed (floor 8 -> 7)": lambda m: [
+            d.__setitem__("code", 7.0) for d in m["onehot"]["floor"] if d["code"] == 8.0],
+        "weight SD changed by 1 ppm": lambda m: m["scaler"]["weight"].__setitem__(
+            1, m["scaler"]["weight"][1] * 1.000001),
+        "9999 rule removed": lambda m: m.__setitem__("missing_codes", []),
+        "v1-style manifest (no version, 31 columns)": lambda m: m.update({
+            "manifest_version": None, "feature_cols": m["feature_cols"][:31]}),
+    }
+    guard_ok = True
+    for label, mutate in mutations.items():
+        altered = copy.deepcopy(manifest)
+        mutate(altered)
+        if core.check_manifest(altered):
+            print(f"  PASS  guard refuses: {label}")
+        else:
+            fail(f"guard accepted an altered manifest: {label}")
+            guard_ok = False
+    if not guard_ok:
+        return 1
 
     model = core.load_model(manifest)
 
@@ -118,7 +177,7 @@ def main() -> int:
                 )
                 if diff > worst_diff:
                     worst_col, worst_diff = col, diff
-                if diff > PROB_TOL:
+                if diff > STAGE_A_TOL:
                     fail(f"column {col}: max abs diff {diff:.3e}")
                     stage_a_ok = False
 
@@ -187,6 +246,18 @@ def main() -> int:
             stage_b_ok = False
         print(f"    [{mark}] {tier:<16s} {got:>6,}   Table 4.10: {want:>6,}")
 
+    # The children who sit exactly on a threshold: the tool must place them as
+    # the notebook did, which it only does if p is compared without rounding.
+    print("\n  Children on the cut-offs (demo X02-X05):")
+    for row, want in CUTOFF_ROWS.items():
+        if row < len(probs):
+            got = core.assign_tier(float(probs[row]), tau_h, tau_m)
+            mark = "ok  " if got == want else "DIFF"
+            if got != want:
+                stage_b_ok = False
+            print(f"    [{mark}] row {row:5d}  p = {float(probs[row]):.8f}  {got:<16s} "
+                  f"expected {want}")
+
     # Informational: has the stored column drifted from the current tau_M?
     if "priority_tier" in ref.columns:
         stored_mismatch = int((ref["priority_tier"].to_numpy() != ref_tiers_now.to_numpy()).sum())
@@ -211,6 +282,29 @@ def main() -> int:
     print(f"STAGE B: {'PASS' if stage_b_ok else 'FAIL'} -- max |prob diff| {max_prob_diff:.2e}, "
           f"{disagreements} tier disagreements (n = {len(probs):,})")
     print(f"Model: {manifest['model_name']}   tau_H = {tau_h:.10f}   tau_M = {tau_m:.10f}")
+    print(f"Environment: Python {platform.python_version()}, pandas {pd.__version__}, "
+          f"numpy {np.__version__}, xgboost {xgb_version}")
+
+    if ok:
+        record = {
+            "checked_on": dt.date.today().isoformat(),
+            "python": platform.python_version(),
+            "pandas": pd.__version__,
+            "numpy": np.__version__,
+            "xgboost": xgb_version,
+            "stage_a_shape": [int(len(built)), int(len(feature_cols))],
+            "stage_a_max_abs_diff": float(worst_diff),
+            "stage_b_max_abs_diff": float(max_prob_diff),
+            "tier_disagreements": int(disagreements),
+            "tier_counts": {t: int(counts.get(t, 0)) for t in core.TIER_ORDER},
+        }
+        repro = core.load_reproduction() or {}
+        repro["local"] = record
+        with open(core.REPRODUCTION_PATH, "w", encoding="utf-8") as fh:
+            json.dump(repro, fh, indent=2)
+            fh.write("\n")
+        print(f"\nWrote the 'local' results to {core.REPRODUCTION_PATH} "
+              "(aggregate values only). Upload that file to GitHub.")
     return 0 if ok else 1
 
 

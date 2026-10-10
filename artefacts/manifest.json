@@ -1,7 +1,17 @@
 {
+  "manifest_version": 2,
+  "encoding_version": "v2: 12 one-hot variables (panel revision R3, 9 Oct 2026)",
   "model_name": "Exp4_ADASYN_XGB",
-  "model_file": "model_Exp4_ADASYN_XGB.json",
-  "exported_at": "2026-09-13 07:41",
+  "model_file": "model_Exp4_ADASYN_XGB_v2.json",
+  "exported_at": "2026-10-09 11:42",
+  "notebook": "LatestThesisModel_v2_FinalRun.ipynb (cell EP-5 v2)",
+  "library_versions": {
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.6.1",
+    "pandas": "2.2.3",
+    "numpy": "2.1.3",
+    "python": "3.13.15"
+  },
   "class_order": [
     "Normal",
     "Stunted",
@@ -12,47 +22,317 @@
     "weight",
     "age",
     "bedroom",
-    "floor",
     "wall",
     "fwealthq",
     "roof",
-    "tenurlot",
     "sex",
-    "electrct",
-    "makesafe",
     "burn",
-    "tenurhws",
     "segregate",
     "composting",
-    "drinksafe",
     "dump",
+    "tenurlot_1.0",
+    "tenurlot_3.0",
     "collect",
     "toilet_1.0",
+    "floor_8.0",
     "wdrinkng_41.0",
-    "wdrinkng_14.0",
+    "electrct_2.0",
     "fuelmain_6.0",
+    "tenurhws_1.0",
+    "wdrinkng_14.0",
     "wdrinkng_91.0",
     "ethnicity",
-    "wdrinkng_11.0",
     "toilet_2.0",
+    "wdrinkng_11.0",
+    "tenurhws_3.0",
     "fuelmain_2.0",
-    "fuelmain_5.0",
+    "floor_2.0",
+    "electrct_5.0",
+    "drinksafe_0.0",
+    "makesafe_0.0",
+    "floor_3.0",
     "wdrinkng_12.0",
+    "fuelmain_5.0",
+    "floor_1.0",
+    "drinksafe_1.0",
     "regcode_8",
-    "regcode_10"
+    "makesafe_1.0",
+    "regcode_10",
+    "tenurlot_2.0",
+    "toilet_8.0",
+    "regcode_5",
+    "regcode_6",
+    "regcode_15"
   ],
-  "tau_H": 0.09889556467533112,
-  "tau_M": 0.049,
-  "tau_M_source": "caseload target 30.0% of screened children flagged (achieved 30.13%)",
+  "feature_dtypes": {
+    "weight": "float64",
+    "age": "float64",
+    "bedroom": "float64",
+    "wall": "float64",
+    "fwealthq": "float64",
+    "roof": "float64",
+    "sex": "int64",
+    "burn": "float64",
+    "segregate": "float64",
+    "composting": "float64",
+    "dump": "float64",
+    "tenurlot_1.0": "bool",
+    "tenurlot_3.0": "bool",
+    "collect": "float64",
+    "toilet_1.0": "bool",
+    "floor_8.0": "bool",
+    "wdrinkng_41.0": "bool",
+    "electrct_2.0": "bool",
+    "fuelmain_6.0": "bool",
+    "tenurhws_1.0": "bool",
+    "wdrinkng_14.0": "bool",
+    "wdrinkng_91.0": "bool",
+    "ethnicity": "int64",
+    "toilet_2.0": "bool",
+    "wdrinkng_11.0": "bool",
+    "tenurhws_3.0": "bool",
+    "fuelmain_2.0": "bool",
+    "floor_2.0": "bool",
+    "electrct_5.0": "bool",
+    "drinksafe_0.0": "bool",
+    "makesafe_0.0": "bool",
+    "floor_3.0": "bool",
+    "wdrinkng_12.0": "bool",
+    "fuelmain_5.0": "bool",
+    "floor_1.0": "bool",
+    "drinksafe_1.0": "bool",
+    "regcode_8": "bool",
+    "makesafe_1.0": "bool",
+    "regcode_10": "bool",
+    "tenurlot_2.0": "bool",
+    "toilet_8.0": "bool",
+    "regcode_5": "bool",
+    "regcode_6": "bool",
+    "regcode_15": "bool"
+  },
+  "raw_inputs": [
+    "weight",
+    "age",
+    "sex",
+    "ethnicity",
+    "regcode",
+    "bedroom",
+    "fwealthq",
+    "roof",
+    "wall",
+    "floor",
+    "tenurhws",
+    "tenurlot",
+    "electrct",
+    "wdrinkng",
+    "drinksafe",
+    "makesafe",
+    "toilet",
+    "fuelmain",
+    "collect",
+    "burn",
+    "dump",
+    "composting",
+    "segregate"
+  ],
+  "categorical_inputs": [
+    "sex",
+    "ethnicity",
+    "regcode",
+    "bedroom",
+    "fwealthq",
+    "roof",
+    "wall",
+    "floor",
+    "tenurhws",
+    "tenurlot",
+    "electrct",
+    "wdrinkng",
+    "drinksafe",
+    "makesafe",
+    "toilet",
+    "fuelmain",
+    "collect",
+    "burn",
+    "dump",
+    "composting",
+    "segregate"
+  ],
+  "missing_codes": [
+    9999
+  ],
+  "onehot": {
+    "tenurlot": [
+      {
+        "column": "tenurlot_1.0",
+        "code": 1.0
+      },
+      {
+        "column": "tenurlot_3.0",
+        "code": 3.0
+      },
+      {
+        "column": "tenurlot_2.0",
+        "code": 2.0
+      }
+    ],
+    "toilet": [
+      {
+        "column": "toilet_1.0",
+        "code": 1.0
+      },
+      {
+        "column": "toilet_2.0",
+        "code": 2.0
+      },
+      {
+        "column": "toilet_8.0",
+        "code": 8.0
+      }
+    ],
+    "floor": [
+      {
+        "column": "floor_8.0",
+        "code": 8.0
+      },
+      {
+        "column": "floor_2.0",
+        "code": 2.0
+      },
+      {
+        "column": "floor_3.0",
+        "code": 3.0
+      },
+      {
+        "column": "floor_1.0",
+        "code": 1.0
+      }
+    ],
+    "wdrinkng": [
+      {
+        "column": "wdrinkng_41.0",
+        "code": 41.0
+      },
+      {
+        "column": "wdrinkng_14.0",
+        "code": 14.0
+      },
+      {
+        "column": "wdrinkng_91.0",
+        "code": 91.0
+      },
+      {
+        "column": "wdrinkng_11.0",
+        "code": 11.0
+      },
+      {
+        "column": "wdrinkng_12.0",
+        "code": 12.0
+      }
+    ],
+    "electrct": [
+      {
+        "column": "electrct_2.0",
+        "code": 2.0
+      },
+      {
+        "column": "electrct_5.0",
+        "code": 5.0
+      }
+    ],
+    "fuelmain": [
+      {
+        "column": "fuelmain_6.0",
+        "code": 6.0
+      },
+      {
+        "column": "fuelmain_2.0",
+        "code": 2.0
+      },
+      {
+        "column": "fuelmain_5.0",
+        "code": 5.0
+      }
+    ],
+    "tenurhws": [
+      {
+        "column": "tenurhws_1.0",
+        "code": 1.0
+      },
+      {
+        "column": "tenurhws_3.0",
+        "code": 3.0
+      }
+    ],
+    "drinksafe": [
+      {
+        "column": "drinksafe_0.0",
+        "code": 0.0
+      },
+      {
+        "column": "drinksafe_1.0",
+        "code": 1.0
+      }
+    ],
+    "makesafe": [
+      {
+        "column": "makesafe_0.0",
+        "code": 0.0
+      },
+      {
+        "column": "makesafe_1.0",
+        "code": 1.0
+      }
+    ],
+    "regcode": [
+      {
+        "column": "regcode_8",
+        "code": 8.0
+      },
+      {
+        "column": "regcode_10",
+        "code": 10.0
+      },
+      {
+        "column": "regcode_5",
+        "code": 5.0
+      },
+      {
+        "column": "regcode_6",
+        "code": 6.0
+      },
+      {
+        "column": "regcode_15",
+        "code": 15.0
+      }
+    ]
+  },
+  "passthrough_cols": [
+    "weight",
+    "age",
+    "bedroom",
+    "wall",
+    "fwealthq",
+    "roof",
+    "sex",
+    "burn",
+    "segregate",
+    "composting",
+    "dump",
+    "collect",
+    "ethnicity"
+  ],
   "impute": {
     "weight": 11.69999980926514,
     "age": 2.822724104,
+    "sex": 1.0,
+    "ethnicity": 0.0,
+    "regcode": 8.0,
     "bedroom": 1.0,
     "fwealthq": 1.0,
     "roof": 6.0,
     "wall": 6.0,
     "floor": 8.0,
-    "dweltype": 1.0,
     "tenurhws": 1.0,
     "tenurlot": 1.0,
     "electrct": 2.0,
@@ -77,6 +357,65 @@
       1.436853151054606
     ]
   },
-  "n_train": 34524,
-  "notebook": "SuperSuperLatestColab_Thesis_PATCH8"
+  "tau_H": 0.10098794847726822,
+  "tau_M": 0.057,
+  "tau_H_source": "Youden's J-statistic",
+  "tau_M_source": "caseload target 30.0% of screened children flagged (achieved 30.00%)",
+  "tier_precision_pct": {
+    "High Priority": 26.72,
+    "Needs Monitoring": 3.68,
+    "On Track": 0.89
+  },
+  "base_rate_pct": 6.61,
+  "caseload_presets": [
+    {
+      "caseload_pct": 20.0,
+      "tau_M": 0.1,
+      "flagged_pct": 21.28,
+      "captured": 489,
+      "captured_pct": 85.64,
+      "degenerate": true
+    },
+    {
+      "caseload_pct": 25.0,
+      "tau_M": 0.078,
+      "flagged_pct": 25.08,
+      "captured": 503,
+      "captured_pct": 88.09,
+      "degenerate": false
+    },
+    {
+      "caseload_pct": 30.0,
+      "tau_M": 0.057,
+      "flagged_pct": 30.0,
+      "captured": 517,
+      "captured_pct": 90.54,
+      "degenerate": false
+    },
+    {
+      "caseload_pct": 35.0,
+      "tau_M": 0.042,
+      "flagged_pct": 34.94,
+      "captured": 531,
+      "captured_pct": 92.99,
+      "degenerate": false
+    },
+    {
+      "caseload_pct": 40.0,
+      "tau_M": 0.031,
+      "flagged_pct": 40.29,
+      "captured": 540,
+      "captured_pct": 94.57,
+      "degenerate": false
+    },
+    {
+      "caseload_pct": 50.0,
+      "tau_M": 0.019,
+      "flagged_pct": 49.7,
+      "captured": 547,
+      "captured_pct": 95.8,
+      "degenerate": false
+    }
+  ],
+  "n_train": 34524
 }
