@@ -1,7 +1,7 @@
 # Stunting Risk Screening Tool
 
 Research prototype accompanying the undergraduate thesis *Addressing Class Imbalance in
-Childhood Stunting Classification* (Group 20, CSS200-1). It operationalises the
+Childhood Stunting Classification* (Group 20, CSS200-3). It operationalises the
 best-performing classifier reported in Chapter 4 — ADASYN oversampling with XGBoost, refitted
 after the encoding revision (twelve nominal variables one-hot encoded; 44 feature columns) — as a
 three-tier screening interface.
