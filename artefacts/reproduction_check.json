@@ -3,12 +3,37 @@
   "notebook": {
     "source": "LatestThesisModel_v2_FinalRun.ipynb, cell EP-5 v2",
     "checked_on": "2026-10-09",
-    "stage_a_shape": [8632, 44],
+    "stage_a_shape": [
+      8632,
+      44
+    ],
     "stage_a_max_abs_diff": 6.217248937900877e-14,
     "stage_b_max_abs_diff": 2.9663085987507998e-08,
     "tier_disagreements": 0,
-    "tier_counts": {"High Priority": 1830, "Needs Monitoring": 760, "On Track": 6042},
+    "tier_counts": {
+      "High Priority": 1830,
+      "Needs Monitoring": 760,
+      "On Track": 6042
+    },
     "xgboost": "3.4.1"
   },
-  "local": null
+  "local": {
+    "checked_on": "2026-10-10",
+    "python": "3.12.1",
+    "pandas": "3.0.6",
+    "numpy": "2.5.3",
+    "xgboost": "3.4.1",
+    "stage_a_shape": [
+      8632,
+      44
+    ],
+    "stage_a_max_abs_diff": 6.217248937900877e-14,
+    "stage_b_max_abs_diff": 3.299354550678757e-08,
+    "tier_disagreements": 0,
+    "tier_counts": {
+      "High Priority": 1830,
+      "Needs Monitoring": 760,
+      "On Track": 6042
+    }
+  }
 }
